@@ -1,12 +1,13 @@
-package com.nikola2934.Service;
+package com.nikola2934.Service.Solver;
 
+import java.util.ArrayList;
 import java.util.EmptyStackException;
 import java.util.Stack;
 
 public class RPN {
 
     //Racunanje postfix izraza
-    public static int racunaj(String[] expr) throws
+    public static int racunaj(ArrayList<String> expr) throws
             ArithmeticException,
             EmptyStackException {
         Stack<Double> stack = new Stack<>();
@@ -46,10 +47,10 @@ public class RPN {
     }
 
     //Konverzija iz postfix-a u infix izraz
-    public static String postToInfix(String[] postfix) {
+    public static String postToInfix(ArrayList<String> postfix) {
         Stack<String> s = new Stack<>();
-        for (int i = 0; i < postfix.length; i++) {
-            String c = postfix[i];
+        for (int i = 0; i < postfix.size(); i++) {
+            String c = postfix.get(i);
             if (isOperator(c)) {
                 String b = s.pop();
                 String a = s.pop();
