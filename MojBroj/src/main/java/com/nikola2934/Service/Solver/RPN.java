@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.EmptyStackException;
 import java.util.Stack;
 
-public class RPN {
+class RPN {
 
     //Racunanje postfix izraza
-    public static int racunaj(ArrayList<String> expr) throws
+    static int racunaj(ArrayList<String> expr) throws
             ArithmeticException,
             EmptyStackException {
         Stack<Double> stack = new Stack<>();
@@ -42,21 +42,32 @@ public class RPN {
     }
 
 
-    private static boolean isOperator(String c) {
-        return c.equals("+") || c.equals("-") || c.equals("*") || c.equals("/");
+    private static boolean isWeakOperator(String c) {
+        return c.equals("+") || c.equals("-");
     }
 
+    private static boolean isStrongOperator(String c) {
+        return c.equals("*") || c.equals("/");
+    }
+
+
     //Konverzija iz postfix-a u infix izraz
-    public static String postToInfix(ArrayList<String> postfix) {
+    static String postToInfix(ArrayList<String> postfix) {
         Stack<String> s = new Stack<>();
         for (int i = 0; i < postfix.size(); i++) {
             String c = postfix.get(i);
-            if (isOperator(c)) {
+
+            if (isWeakOperator(c)) {
                 String b = s.pop();
                 String a = s.pop();
                 s.push("(" + a + c + b + ")");
-            } else
+            } else if (isStrongOperator(c)) {
+                String b = s.pop();
+                String a = s.pop();
+                s.push(a + c + b);
+            } else {
                 s.push("" + c);
+            }
         }
 
         String out = "";

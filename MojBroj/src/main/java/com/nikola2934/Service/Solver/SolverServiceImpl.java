@@ -2,6 +2,7 @@ package com.nikola2934.Service.Solver;
 
 import org.springframework.stereotype.Service;
 
+import java.security.InvalidParameterException;
 import java.util.*;
 
 @Service
@@ -13,42 +14,49 @@ public class SolverServiceImpl implements SolverService {
     private int target;
     private int brojElemenata;
 
-//    public static void main(String[]args){
-//        ArrayList<String> brojevi = new ArrayList<String>();
-//        brojevi.add("3");
-//        brojevi.add("5");
-//        brojevi.add("9");
-//        brojevi.add("3");
-//        brojevi.add("15");
-//        brojevi.add("25");
-//        ArrayList<String> resenja = new SolverServiceImpl().findSolution(brojevi, 397);
-//        System.out.println(Arrays.toString(resenja.toArray()));
-//    }
     @Override
-    public ArrayList<String> findSolution(ArrayList<String> numbers, Integer target) {
+    public ArrayList<String> findSolution(ArrayList<Integer> numbers, Integer target) throws InvalidParameterException {
+        validateInput(numbers, target);
         init();
-
         this.target = target;
         this.brojElemenata = numbers.size();
 
         System.out.println("Elementi: " + Arrays.toString(numbers.toArray()) + "\nTrazeno resenje: " + target);
         System.out.println("Resavanje...");
-        for (String i : numbers) {
-            pomocniIzraz.add(i + "");
-        }
-        resavanje(numbers);
+
+        //Formatiranje
+        ArrayList<String> numbersStr = new ArrayList<>();
+        numbers.forEach(integer -> numbersStr.add(integer+""));
+        pomocniIzraz = new ArrayList<>(numbersStr);
+        resavanje(numbersStr);
         System.out.println("Broj resenja :" + resenja.size());
         return formatirajResenja();
     }
 
-    private void init(){
+    private void validateInput(ArrayList<Integer> numbers, Integer target) {
+        if (numbers == null || numbers.isEmpty()) {
+            throw new InvalidParameterException("Invalid list of elements");
+        }
+        if (numbers.size() > 6) {
+            throw new InvalidParameterException("To many elements");
+        }
+        if (target == null) {
+            throw new InvalidParameterException("Invalid target value");
+        }
+        if (target <= 0) {
+            throw new InvalidParameterException("Target number must be grater than 0");
+        }
+    }
+
+    private void init() {
         podskupovi = new HashSet<>();
         izrazi = new HashMap<>();
         pomocniIzraz = new ArrayList<>();
         resenja = new HashSet<>();
-        target=0;
-        brojElemenata=0;
+        target = 0;
+        brojElemenata = 0;
     }
+
     private void resavanje(ArrayList<String> numbers) {
         getPodskupovi(numbers, 0, 2, new ArrayList<>());
 
@@ -90,13 +98,9 @@ public class SolverServiceImpl implements SolverService {
                 //Kopiranje mape
                 HashMap<Izraz, Integer> izraziNovi = new HashMap<>(izrazi);
 
-                //TODO NASTAVI NA DALJE
                 for (Map.Entry<Izraz, Integer> izraz : izraziNovi.entrySet()) {
                     Izraz stariIzraz = izraz.getKey();
 
-//                if (stariIzraz.length >= 10) {
-//                    continue;
-//                }
                     // Razlika elemenata, u novoj listi iskljucujemo elemente iz starog izraza
                     ArrayList<String> pomocnaLista = getRazlika(pomocniIzraz, stariIzraz);
 
@@ -123,7 +127,6 @@ public class SolverServiceImpl implements SolverService {
                                 if (rezultat == target) {
                                     resenja.add(temp);
                                     reseno = true;
-//                                    System.out.println(Arrays.toString(temp.getE().toArray()));
                                     break;
                                 }
                                 //Dodaj novi izraz
@@ -144,12 +147,7 @@ public class SolverServiceImpl implements SolverService {
 
                             if (rezultat != 0) {
                                 //Pronasli smo resenje
-                                if (rezultat == target) {
-                                    resenja.add(temp);
-                                    reseno = true;
-//                                    System.out.println(Arrays.toString(temp.getE().toArray()));
-                                    break;
-                                }
+                                reseno = isResenje(rezultat, temp);
                                 //Dodaj novi izraz
                                 izrazi.putIfAbsent(temp, rezultat);
                             }
@@ -164,7 +162,6 @@ public class SolverServiceImpl implements SolverService {
         //Imamo novo resenje
         if (rezultat == target) {
             resenja.add(izraz);
-            System.out.println(Arrays.toString(izraz.getE().toArray()));
             return true;
         }
         return false;

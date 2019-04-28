@@ -1,35 +1,40 @@
 package com.nikola2934.Controller;
 
+import com.nikola2934.RequestModel.SolveRequest;
 import com.nikola2934.Service.Solver.SolverService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/*")
 public class ApiController {
 
-    @Autowired
-    private SolverService solverService;
+    private final SolverService solverService;
 
-    @PostMapping("solve")
-    public ArrayList<String> solve(@RequestBody Map<String, Object> body) {
-        ArrayList<Integer> numbersRaw = (ArrayList<Integer>) body.get("numbers");
-        System.out.println(Arrays.toString(numbersRaw.toArray()));
-        Integer target = (Integer) body.get("target");
-        ArrayList<String> numbers = new ArrayList<>();
-        for (Integer i : numbersRaw) {
-            numbers.add(i + "");
-        }
-        ArrayList<String> solutions = solverService.findSolution(numbers, target);
-        return solutions;
+    public ApiController(SolverService solverService) {
+        this.solverService = solverService;
     }
 
-    @GetMapping("testin")
-    public String testing() {
-        return "WORKS!";
+    @PostMapping("solve")
+    public ResponseEntity<Map<String,Object>> solve(@RequestBody SolveRequest body) {
+        ArrayList<Integer> numbers = body.getNumbers();
+        Integer target = body.getTarget();
+
+        Map<String, Object> respData = new HashMap<>();
+        try {
+            ArrayList<String> solutions = solverService.findSolution(numbers, target);
+            respData.put("solutions", solutions);
+            respData.put("success", true);
+            return new ResponseEntity<>(respData, HttpStatus.OK);
+        }catch (Exception e) {
+            respData.put("success", false);
+            respData.put("message", e.getMessage());
+            return new ResponseEntity<>(respData, HttpStatus.BAD_REQUEST);
+        }
     }
 }
