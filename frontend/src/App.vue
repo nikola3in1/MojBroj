@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app >
     <v-toolbar app>
       <v-toolbar-title class="headline text-uppercase">
         <span>Moj Broj</span>
@@ -16,17 +16,17 @@
 </template>
 
 <script>
-import SolverForm from './components/HelloWorld'
+import SolverForm from "./components/SolverForm";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
     SolverForm
   },
-  data () {
+  data() {
     return {
       //
-    }
+    };
   }
-}
+};
 </script>
