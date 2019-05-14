@@ -1,4 +1,6 @@
 <template>
+
+<!-- FIX CORS, FIX OPTIONS REQUEST -->
   <v-container>
     <v-layout text-xs-center wrap>
       <v-flex xs12>
