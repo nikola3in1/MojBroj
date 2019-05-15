@@ -95,18 +95,23 @@
         </v-form>
       </v-flex>
       <!-- Solutions -->
+
       <v-flex mb-1 xs12>
-        <div v-if="displaySolutions">
-          <v-container v-if="hasSolutions()">
-            <h2 class="headline font-weight-bold mb-3">Solutions</h2>
-            <h2 v-for="(solution, index) in solutions" v-bind:key="index">{{solution}}</h2>
-          </v-container>
-          <v-container v-else>
-            <h2
-              class="headline font-weight-bold mb-3"
-            >Sorry, there are no solutions for the given expression.</h2>
-          </v-container>
-        </div>
+        <transition name="fade">
+          <div v-if="displaySolutions">
+            <v-container v-if="hasSolutions()">
+              <h2 class="headline font-weight-bold mb-3">Solutions</h2>
+              <transition-group name="list" tag="p">
+                <h2 v-for="(solution, index) in solutions" v-bind:key="index">{{solution}}</h2>
+              </transition-group>
+            </v-container>
+            <v-container v-else>
+              <h2
+                class="headline font-weight-bold mb-3"
+              >Sorry, there are no solutions for the given expression.</h2>
+            </v-container>
+          </div>
+        </transition>
       </v-flex>
     </v-layout>
   </v-container>
@@ -115,6 +120,8 @@
 <script>
 import { validationMixin } from "vuelidate";
 import { required, between, numeric } from "vuelidate/lib/validators";
+import { setTimeout, setInterval } from "timers";
+import { constants } from "crypto";
 export default {
   mixins: [validationMixin],
 
@@ -137,14 +144,15 @@ export default {
     nr5: 10,
     nr6: 25,
     target: 1,
-    solutions: Array,
+    solutions: [],
     displaySolutions: false,
     serverOrigin: "http://localhost:3030"
   }),
 
   methods: {
     submit: function() {
-      this.solutions = [];
+      //Testing 
+      // this.solutions = [];
 
       let numbersArr = [];
       numbersArr.push(
@@ -162,14 +170,25 @@ export default {
       };
 
       this.$http
-        .post(this.serverOrigin+"/api/v1/solve", body)
+        .post(this.serverOrigin + "/api/v1/solve", body)
         .then(function(data) {
           if (data.body.solutions.length > 0) {
             //We have soultions
-            this.solutions = data.body.solutions;
+            data.body.solutions.forEach(solution => {
+              this.addSolution(solution);
+            });
           }
           this.displaySolutions = true;
         });
+
+      this.solutions.forEach(solutions => {
+        this.solutions.push(solutions + " <");
+        console.log("cao");
+      });
+
+    },
+    addSolution: function(solution) {
+      this.solutions.push(solution);
     },
     hasSolutions: function() {
       return this.solutions.length > 0;
@@ -194,5 +213,26 @@ export default {
 }
 .smallInput {
   width: 60% !important;
+}
+
+.list-item {
+  display: inline-block;
+  margin-right: 10px;
+}
+.list-enter-active,
+.list-leave-active {
+  transition: all 1s;
+}
+.list-enter, .list-leave-to /* .list-leave-active below version 2.1.8 */ {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+  opacity: 0;
 }
 </style>
